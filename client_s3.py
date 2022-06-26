@@ -46,7 +46,7 @@ def print_file(file_name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print('hello')
+    print('hello1')
     temp_location = os.getenv('TEMP')
     file_to_download = 'downloadtest.txt'
     # upload_file('umadhu1608test', '../uploadtest.txt', object_name=None)
