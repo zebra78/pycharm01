@@ -23,12 +23,14 @@ Resources:
                     Ref Vpc
                 #Value: CreateVPCCtnVpc
 
-#Outputs:
-#    Vpc:
-#        Description: Id of Vpc
-#        Value: !Ref AppVpc
-#        Export:
-#            Name: !Sub "${AWS::StackName}-Vpc"
+Outputs:
+    Vpc:
+        Description: Id of Vpc
+        Value:
+            Ref AppVpc
+        Export:
+            Name:
+                Sub "${AWS::StackName}-Vpc"
 
 
 
