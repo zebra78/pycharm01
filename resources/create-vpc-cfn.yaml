@@ -21,7 +21,7 @@ Resources:
             -   Key: Name
                 Value:
                     Ref Vpc
-                #Value: CreateVPCCtnVpc
+                #Value: CreateVPCCfn
 
 Outputs:
     Vpc:
@@ -30,9 +30,27 @@ Outputs:
             Ref AppVpc
         Export:
             Name:
-                Sub "${AWS::StackName}-Vpc"
+                Fn::Sub: "${AWS::StackName}-Vpc"
+
 
 
 
 # https://github.com/widdix/learn-cloudformation/blob/master/lab11-output-exports/sample-solution-export.yaml
 # https://github.com/widdix/learn-cloudformation/blob/master/lab11-output-exports/sample-solution-import.yaml
+
+#Outputs:
+#    Vpc:
+#        Description: Id of Vpc
+#        Value:
+#            Ref AppVpc
+#        Export:
+#            Name:
+#                Sub "${AWS::StackName}-Vpc"
+#  AppDnsRecord:
+#    Type: AWS::Route53::RecordSet
+#    Properties:
+#      HostedZoneId: !ImportValue HostedZone-zone-id
+#      Name:
+#        Fn::Sub:
+#        - "myapp.${HostedZoneName}"
+#        - HostedZoneName: !ImportValue HostedZone-zone-name
