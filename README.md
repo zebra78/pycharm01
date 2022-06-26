@@ -11,6 +11,15 @@ madhu@madhu:~/.ansible$ cat /home/madhu/.ansible/hosts
 127.0.0.1
 
 Test
+
+Create ansible.cfg as below:
+madhu@madhu:~$ cat /home/madhu/.ansible.cfg 
+[defaults]
+# some basic default values...
+inventory = /home/madhu/.ansible/hosts  ; This points to the file that lists your hosts
+
+
+
 Go to /home/madhu/.ansible
 Run and expect output as below
 
