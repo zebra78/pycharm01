@@ -1,0 +1,36 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Create a vpc'
+
+Parameters:
+
+    Vpc:
+        Description: The name of the stack that exports the values
+        Type: String
+        Default: AppVpc
+
+Resources:
+    AppVpc:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.0.0.0/16
+            EnableDnsSupport: 'true'
+            EnableDnsHostnames: 'true'
+            InstanceTenancy: default
+            Tags:
+            -   Key: Name
+                Value:
+                    Ref Vpc
+                #Value: CreateVPCCtnVpc
+
+#Outputs:
+#    Vpc:
+#        Description: Id of Vpc
+#        Value: !Ref AppVpc
+#        Export:
+#            Name: !Sub "${AWS::StackName}-Vpc"
+
+
+
+# https://github.com/widdix/learn-cloudformation/blob/master/lab11-output-exports/sample-solution-export.yaml
+# https://github.com/widdix/learn-cloudformation/blob/master/lab11-output-exports/sample-solution-import.yaml
