@@ -1,0 +1,202 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Create a bastion setup'
+
+Parameters:
+    VpcParam:
+        Description: The name of the stack that exports the values
+        Type: String
+        Default: bastion-vpc
+    IGWParam:
+        Description: The IGWParam
+        Type: String
+        Default: bastion-igw
+    RTParam:
+        Description: The RTParam
+        Type: String
+        Default: bastion-rt
+    PubSn1Param:
+        Description: The PubSn1Param
+        Type: String
+        Default: bastion-pubsn1
+    PubSn2Param:
+        Description: The PubSn2Param
+        Type: String
+        Default: bastion-pubsn2
+    PubSg1Param:
+        Description: PubSg1Param
+        Type: String
+        Default: bastion-pubSg1
+    JumpServerParam:
+        Description: The JumpServerParam
+        Type: String
+        Default: bastion-jumpserver
+    ImageIdParam:
+        Description: The ImageIdParam
+        Type: String
+        Default: ami-068257025f72f470d
+
+Resources:
+    BastionVpc:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.0.0.0/16
+            EnableDnsSupport: 'true'
+            EnableDnsHostnames: 'true'
+            InstanceTenancy: default
+            Tags:
+            -   Key: Name
+                Value:
+                        Ref VpcParam
+
+    BastionIgw:
+        Type: AWS::EC2::InternetGateway
+        Properties:
+            Tags:
+            -   Key: Name
+                Value:
+                    Ref IGWParam
+
+    BastionIgwAttachToBastionVpc:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            VpcId:
+                Ref: BastionVpc
+            InternetGatewayId:
+                Ref: BastionIgw
+
+    BastionRtIgw:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId:
+                Ref: BastionVpc
+            Tags:
+            - Key: Name
+              Value:
+                  Ref RTParam
+
+    BastionRtIgwAddRoute:
+        Type: AWS::EC2::Route
+        DependsOn: BastionIgw
+        Properties:
+            RouteTableId:
+                Ref: BastionRtIgw
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId:
+                Ref: BastionIgw
+
+    BastionPubSn1:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId:
+                Ref: BastionVpc
+            CidrBlock: 10.0.1.0/24
+            AvailabilityZone: "ap-south-1a"
+            Tags:
+            - Key: Name
+              Value:
+                  Ref PubSn1Param
+
+    BastionPubSn2:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId:
+                Ref: BastionVpc
+            CidrBlock: 10.0.2.0/24
+            AvailabilityZone: "ap-south-1b"
+            Tags:
+            - Key: Name
+              Value:
+                  Ref PubSn2Param
+
+    BastionRtIgwAssociateBastionPubSn1:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId:
+                Ref: BastionPubSn1
+            RouteTableId:
+                Ref: BastionRtIgw
+
+    BastionRtIgwAssociateBastionPubSn2:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId:
+                Ref: BastionPubSn2
+            RouteTableId:
+                Ref: BastionRtIgw
+
+    BastionPubSg1:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: BastionPubSg1
+            GroupName: BastionPubSg1
+            VpcId:
+                Ref: BastionVpc
+            SecurityGroupIngress:
+            - IpProtocol: tcp
+              FromPort: 22
+              ToPort: 22
+              CidrIp: 0.0.0.0/0
+            Tags:
+            - Key: Name
+              Value:
+                  Ref PubSg1Param
+
+    JumpServer:
+        Type: AWS::EC2::Instance
+        Properties:
+            InstanceType: t2.micro
+            ImageId:
+                Ref ImageIdParam
+            KeyName: bastion
+            NetworkInterfaces:
+            - AssociatePublicIpAddress: "true"
+              DeviceIndex: "0"
+              GroupSet:
+              - Ref:    "BastionPubSg1"
+              SubnetId:
+                Ref:    "BastionPubSn1"
+            Tags:
+            - Key: Name
+              Value:
+                  Ref JumpServerParam
+
+Outputs:
+    RootVpc:
+        Description: Output VpcId
+        Value:
+            Ref BastionVpc
+        Export:
+            Name:
+                Fn::Sub: "${AWS::StackName}-VpcId"
+    RootCidr:
+        Description: Output Cidr
+        Value:
+            Fn::GetAtt: BastionVpc.CidrBlock
+        Export:
+            Name:
+                  Fn::Sub: "${AWS::StackName}-VpcCidr"
+    RtIgw:
+        Description: Output Route Table
+        Value:
+            Ref BastionRtIgw
+        Export:
+            Name:
+                  Fn::Sub: "${AWS::StackName}-RtIgw"
+    Pip:
+        Description: Output JumpEip
+        Value:
+            Fn::GetAtt: JumpServer.PrivateIp
+        Export:
+            Name:
+                  Fn::Sub: "${AWS::StackName}-Pip"
+    Eip:
+        Description: Output JumpEip
+        Value:
+            Fn::GetAtt: JumpServer.PublicIp
+        Export:
+            Name:
+                Fn::Sub: "${AWS::StackName}-Eip"
+
+
+# https://github.com/widdix/learn-cloudformation/blob/master/lab11-output-exports/sample-solution-export.yaml
