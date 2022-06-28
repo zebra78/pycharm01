@@ -137,7 +137,6 @@ def nearest_value(values: set, one: int) -> int:
     near_num_val: int
     i: int = 0
     for value in values:
-        print('loop_value: ', value)
         if i == 0:
             near_num_dif = abs(value - one)
             near_num_val = value
@@ -154,8 +153,32 @@ def nearest_value(values: set, one: int) -> int:
     return near_num_val
 
 
+def checkio(data: list) -> list:
+    my_dict = {}
+    for str1 in data:
+        keys1 = my_dict.keys()
+        if str1 in keys1:
+            val = my_dict.get(str1) + 1
+            my_dict[str1] = val
+        else:
+            my_dict[str1] = 1
+    keys = my_dict.keys()
+    data1 = data
+    for key in keys:
+        if my_dict.get(key) == 1:
+            data1.remove(key)
+    return data1
+
+
 if __name__ == "__main__":
-    print(nearest_value([0, -2], -1))
+
+    assert list(checkio([1, 2, 3, 1, 3])) == [1, 3, 1, 3], "1st example"
+    assert list(checkio([1, 2, 3, 4, 5])) == [], "2nd example"
+    assert list(checkio([5, 5, 5, 5, 5])) == [5, 5, 5, 5, 5], "3rd example"
+    assert list(checkio([10, 9, 10, 10, 9, 8])) == [10, 9, 10, 10, 9], "4th example"
+    print("It is all good. Let's check it now")
+
+    # print(nearest_value([0, -2], -1))
     # assert nearest_value({4, 7, 10, 11, 12, 17}, 9) == 10
     # assert nearest_value({4, 7, 10, 11, 12, 17}, 8) == 7
     # assert nearest_value({4, 8, 10, 11, 12, 17}, 9) == 8
