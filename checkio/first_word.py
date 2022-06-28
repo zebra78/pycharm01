@@ -77,15 +77,77 @@ def remove_all_before(data: list, border_element: int) -> Iterable:
 
 
 def is_all_upper(text: str) -> bool:
-    str_chr = text.split(text)
-    for c in chr(str_chr):
-        if int(ord(c)) >= 97 and int(ord(c)) <= 122:
+    for chars in text:
+        if 97 <= int(ord(chars)) <= 122:
             return False
     return True
 
 
+def replace_first(items: list) -> Iterable:
+    if len(items) > 0:
+        items.append(items[0])
+        items.pop(0)
+    return items
+
+
+def max_digit(number: int) -> int:
+    prev_max_digit = 0
+    while number > 0:
+        curr_max_digit = number % 10
+        if curr_max_digit > prev_max_digit:
+            prev_max_digit = curr_max_digit
+        number = int(number / 10)
+    return prev_max_digit
+
+
+def beginning_zeros(number: str) -> int:
+    number2 = int(number)
+    if number2 == 0:
+        return len(number)
+    return len(number) - len(str(number2))
+
+
+def between_markers(text: str, begin: str, end: str) -> str:
+    return text[text.index(begin)+1: text.index(end)]
+
+
+def split_pairs(a: str) -> list:
+    mylist = []
+    if len(a) % 2 != 0:
+        a = a + '_'
+    for n in range(0, len(a), 2):
+        mylist.append(a[n:n+2])
+    return mylist
+
+
 if __name__ == "__main__":
-    print('Overcome Indentation warning in PyCharm')
+    print(split_pairs('mystrings'))
+    # print(between_markers('hello >madhu< sudhan', '>', '<'))
+    #
+    # assert between_markers('What is >apple<', '>', '<') == "apple"
+    # assert between_markers('What is [apple]', '[', ']') == "apple"
+    # assert between_markers('What is ><', '>', '<') == ""
+    # assert between_markers('>apple<', '>', '<') == "apple"
+
+    # print(beginning_zeros('100'))
+    # print(beginning_zeros('001'))
+    # print(beginning_zeros('100100'))
+    # print(beginning_zeros('001001'))
+    # print(beginning_zeros('012345679'))
+    # print(beginning_zeros('0000'))
+    # assert list(replace_first([1, 2, 3, 4])) == [2, 3, 4, 1]
+    # assert list(replace_first([1])) == [1]
+    # assert list(replace_first([])) == []
+
+    # print(is_all_upper('ALL UPPER'))
+    # assert is_all_upper('ALL UPPER') == True
+    # assert is_all_upper('all lower') == False
+    # assert is_all_upper('mixed UPPER and lower') == False
+    # assert is_all_upper('') == True
+    # assert is_all_upper('     ') == True
+    # assert is_all_upper('444') == True
+    # assert is_all_upper('55 55 5') == True
+
     # assert first_word("Hello world") == "Hello"
     # assert first_word("a word") == "a"
     # assert first_word("hi") == "hi"
@@ -121,10 +183,3 @@ if __name__ == "__main__":
     # assert list(remove_all_before([], 0)) == []
     # assert list(remove_all_before([7, 7, 7, 7, 7, 7, 7, 7, 7], 7)) == [7, 7, 7, 7, 7, 7, 7, 7, 7]
 
-    # assert is_all_upper('ALL UPPER') == True
-    # assert is_all_upper('all lower') == False
-    # assert is_all_upper('mixed UPPER and lower') == False
-    # assert is_all_upper('') == True
-    # assert is_all_upper('     ') == True
-    # assert is_all_upper('444') == True
-    # assert is_all_upper('55 55 5') == True
