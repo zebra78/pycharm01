@@ -120,8 +120,60 @@ def split_pairs(a: str) -> list:
     return mylist
 
 
+def correct_sentence(text: str) -> str:
+    if not text.endswith('.'):
+        text = f"{text}."
+    return f"{text[0].upper()}{text[1:]}"
+
+
+def is_even(num: int) -> bool:
+    if num % 2 == 0:
+        return True
+    return False
+
+
+def nearest_value(values: set, one: int) -> int:
+    near_num_dif: int
+    near_num_val: int
+    i: int = 0
+    for value in values:
+        print('loop_value: ', value)
+        if i == 0:
+            near_num_dif = abs(value - one)
+            near_num_val = value
+            i += 1
+        else:
+            if abs(value - one) == near_num_dif:
+                if value < near_num_val:
+                    near_num_val = value
+            elif abs(value - one) < near_num_dif:
+                near_num_dif = abs(value - one)
+                near_num_val = value
+        if near_num_dif == 0:
+            return one
+    return near_num_val
+
+
 if __name__ == "__main__":
-    print(split_pairs('mystrings'))
+    print(nearest_value([0, -2], -1))
+    # assert nearest_value({4, 7, 10, 11, 12, 17}, 9) == 10
+    # assert nearest_value({4, 7, 10, 11, 12, 17}, 8) == 7
+    # assert nearest_value({4, 8, 10, 11, 12, 17}, 9) == 8
+    # assert nearest_value({4, 9, 10, 11, 12, 17}, 9) == 9
+    # assert nearest_value({4, 7, 10, 11, 12, 17}, 0) == 4
+    # assert nearest_value({-6, -2, 4, 7, 12, 17}, -4) == -6
+    # assert nearest_value({4, 7, 10, 11, 12, 17}, 100) == 17
+    # assert nearest_value({5, 10, 8, 12, 89, 100}, 7) == 8
+    # assert nearest_value({5}, 5) == 5
+    # assert nearest_value({5}, 7) == 5
+    # print(is_even(4))
+    # print(is_even(7))
+    # print(correct_sentence('Good morning. Venkat.'))
+    # print(correct_sentence('Good morning. Venkat'))
+    # print(correct_sentence('good morning. Venkat'))
+    # print(correct_sentence('good morning. Venkat.'))
+
+    # print(split_pairs('mystrings'))
     # print(between_markers('hello >madhu< sudhan', '>', '<'))
     #
     # assert between_markers('What is >apple<', '>', '<') == "apple"
