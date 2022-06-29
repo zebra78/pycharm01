@@ -153,7 +153,7 @@ def nearest_value(values: set, one: int) -> int:
     return near_num_val
 
 
-def checkio(data: list) -> list:
+def remove_unique_occurence(data: list) -> list:
     my_dict = {}
     for str1 in data:
         keys1 = my_dict.keys()
@@ -170,13 +170,35 @@ def checkio(data: list) -> list:
     return data1
 
 
-if __name__ == "__main__":
+def three_word_in_seq(text: str) -> bool:
+    word_count: int = 0
+    for word_one in text.split():
+        try:
+            temp_int = int(word_one)
+            word_count = 0
+        except ValueError:
+            word_count += 1
+        if word_count == 3:
+            return True
+    return False
 
-    assert list(checkio([1, 2, 3, 1, 3])) == [1, 3, 1, 3], "1st example"
-    assert list(checkio([1, 2, 3, 4, 5])) == [], "2nd example"
-    assert list(checkio([5, 5, 5, 5, 5])) == [5, 5, 5, 5, 5], "3rd example"
-    assert list(checkio([10, 9, 10, 10, 9, 8])) == [10, 9, 10, 10, 9], "4th example"
-    print("It is all good. Let's check it now")
+
+if __name__ == "__main__":
+    print('Example:')
+    print(three_word_in_seq("Hello World hello"))
+
+    assert three_word_in_seq("Hello World hello") == True, "Hello"
+    assert three_word_in_seq("He is 123 man") == False, "123 man"
+    assert three_word_in_seq("1 2 3 4") == False, "Digits"
+    assert three_word_in_seq("bla bla bla bla") == True, "Bla Bla"
+    assert three_word_in_seq("Hi") == False, "Hi"
+    print("three_word_in_seq complete? Click 'Check' to review your tests and earn cool rewards!")
+
+    # assert list(remove_unique_occurence([1, 2, 3, 1, 3])) == [1, 3, 1, 3], "1st example"
+    # assert list(remove_unique_occurence([1, 2, 3, 4, 5])) == [], "2nd example"
+    # assert list(remove_unique_occurence([5, 5, 5, 5, 5])) == [5, 5, 5, 5, 5], "3rd example"
+    # assert list(remove_unique_occurence([10, 9, 10, 10, 9, 8])) == [10, 9, 10, 10, 9], "4th example"
+    # print("It is all good. Let's check it now")
 
     # print(nearest_value([0, -2], -1))
     # assert nearest_value({4, 7, 10, 11, 12, 17}, 9) == 10
