@@ -104,8 +104,9 @@ def query_with_fetchmany(size: int = 1):
         cursor = conn.cursor()
 
         cursor.execute("SELECT * FROM usersubs")
-
+        print('recvd size: ', size)
         for row in iter_row(cursor, size):
+            print('inrow_iterrow')
             print(row)
 
     except Error as e:
@@ -114,6 +115,16 @@ def query_with_fetchmany(size: int = 1):
     finally:
         cursor.close()
         conn.close()
+
+
+
+
+
+def stale_fetchmany(cursor, size) -> list:
+    while True:
+        return cursor.fetchmany(size)
+        if not rows:
+            break
 
 
 def stale_fetchall() -> list:
@@ -143,29 +154,50 @@ def stale_bp_stype_old2(stale_row: tuple, file: str):
         f.write('cancel#'+str(stale_row[0]))
 
 
-def stale_bp_stype(stale_rows: list, file: str):
-    with open(file, 'w') as f:
-        for stale_row in stale_rows:
-            # print('wrote#'+str(stale_row[0]))
-            f.write('cancel#'+str(stale_row[0]) + '\n')
-
-
 def stale_bp_print(file: str):
     with open(file, 'r') as f:
         # print('inread')
         print(f.read())
 
 
+def stale_bp_stype(file: str, stale_rows: list):
+
+    with open(file, 'a') as f:
+        f.write('batchstart\n')
+        for stale_row in stale_rows:
+            # print('wrote#'+str(stale_row[0]))
+            f.write('cancel#'+str(stale_row[0]) + '\n')
+
+
+def process_fetchmany(file: str, size: int = 100):
+    try:
+        dbconfig = read_db_config()
+        conn = MySQLConnection(**dbconfig)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM usersubs")
+        while True:
+            rows = cursor.fetchmany(size)
+            stale_bp_stype(file, rows)
+            if not rows:
+                break
+    except Error as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
 if __name__ == '__main__':
+    file = "stale_bpinput" + datetime.today().isoformat()
+    process_fetchmany(file, 3)
     # query_with_fetchall()
     # query_with_fetchone()
     # query_with_fetchmany(2)
-    rows = stale_fetchall()
+    # rows = stale_fetchall()
     # print(rows)
-    file = "stale_bpinput"+datetime.today().isoformat()
     # for row in rows:
     #     print('inrow')
     #     stale_bp_stype(row, file)
-    stale_bp_stype(rows, file)
+    # stale_bp_stype(rows, file)
     stale_bp_print(file)
 
