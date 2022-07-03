@@ -1,6 +1,6 @@
 from mysql.connector import MySQLConnection, Error
 from configparser import ConfigParser
-
+from datetime import datetime
 
 def read_db_config(filename='config.ini', section='mysql'):
     """ Read database configuration file and return a dictionary object
@@ -130,8 +130,30 @@ def stale_fetchall() -> list:
         conn.close()
 
 
-def stale_batchinput_stype(stale_rows: list) -> list:
+def stale_bp_stype_old(stale_rows: list):
     for row in stale_rows:
+        bp_row = 'cancne#' + str(row[0])
+        print(bp_row)
+    return
+
+
+def stale_bp_stype_old2(stale_row: tuple, file: str):
+    with open(file, 'w') as f:
+        # print('wrote#'+str(stale_row[0]))
+        f.write('cancel#'+str(stale_row[0]))
+
+
+def stale_bp_stype(stale_rows: list, file: str):
+    with open(file, 'w') as f:
+        for stale_row in stale_rows:
+            # print('wrote#'+str(stale_row[0]))
+            f.write('cancel#'+str(stale_row[0]) + '\n')
+
+
+def stale_bp_print(file: str):
+    with open(file, 'r') as f:
+        # print('inread')
+        print(f.read())
 
 
 if __name__ == '__main__':
@@ -139,8 +161,11 @@ if __name__ == '__main__':
     # query_with_fetchone()
     # query_with_fetchmany(2)
     rows = stale_fetchall()
-    print('in main')
-    print(type(rows))
-    for row in rows:
-        print(type(row))
-        print(row)
+    # print(rows)
+    file = "stale_bpinput"+datetime.today().isoformat()
+    # for row in rows:
+    #     print('inrow')
+    #     stale_bp_stype(row, file)
+    stale_bp_stype(rows, file)
+    stale_bp_print(file)
+
