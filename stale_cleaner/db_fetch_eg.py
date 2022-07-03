@@ -52,9 +52,9 @@ def query_with_fetchall():
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM usersubs")
+        cursor.execute("SELECT subid, status, partner FROM usersubs")
         rows = cursor.fetchall()
-
+        print(type(rows))
         print('Total Row(s):', cursor.rowcount)
         for row in rows:
             print(row)
@@ -88,7 +88,7 @@ def query_with_fetchone():
         conn.close()
 
 
-def iter_row(cursor, size=10):
+def iter_row(cursor, size):
     while True:
         rows = cursor.fetchmany(size)
         if not rows:
@@ -105,7 +105,7 @@ def query_with_fetchmany(size: int = 1):
 
         cursor.execute("SELECT * FROM usersubs")
 
-        for row in iter_row(cursor, 10):
+        for row in iter_row(cursor, size):
             print(row)
 
     except Error as e:
@@ -116,7 +116,31 @@ def query_with_fetchmany(size: int = 1):
         conn.close()
 
 
+def stale_fetchall() -> list:
+    try:
+        dbconfig = read_db_config()
+        conn = MySQLConnection(**dbconfig)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM usersubs")
+        return cursor.fetchall()
+    except Error as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def stale_batchinput_stype(stale_rows: list) -> list:
+    for row in stale_rows:
+
+
 if __name__ == '__main__':
-    query_with_fetchall()
+    # query_with_fetchall()
     # query_with_fetchone()
     # query_with_fetchmany(2)
+    rows = stale_fetchall()
+    print('in main')
+    print(type(rows))
+    for row in rows:
+        print(type(row))
+        print(row)
