@@ -1,6 +1,8 @@
 from mysql.connector import MySQLConnection, Error
 from configparser import ConfigParser
 from datetime import datetime
+import subprocess
+
 
 def read_db_config(filename='config.ini', section='mysql'):
     """ Read database configuration file and return a dictionary object
@@ -48,6 +50,7 @@ def connect():
 
 
 def query_with_fetchall():
+    conn = ""
     try:
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
@@ -117,14 +120,9 @@ def query_with_fetchmany(size: int = 1):
         conn.close()
 
 
-
-
-
 def stale_fetchmany(cursor, size) -> list:
     while True:
         return cursor.fetchmany(size)
-        if not rows:
-            break
 
 
 def stale_fetchall() -> list:
@@ -148,28 +146,28 @@ def stale_bp_stype_old(stale_rows: list):
     return
 
 
-def stale_bp_stype_old2(stale_row: tuple, file: str):
-    with open(file, 'w') as f:
+def stale_bp_stype_old2(stale_row: tuple, state_file: str):
+    with open(state_file, 'w') as f:
         # print('wrote#'+str(stale_row[0]))
         f.write('cancel#'+str(stale_row[0]))
 
 
-def stale_bp_print(file: str):
-    with open(file, 'r') as f:
+def stale_bp_print(state_file: str):
+    with open(state_file, 'r') as f:
         # print('inread')
         print(f.read())
 
 
-def stale_bp_stype(file: str, stale_rows: list):
+def stale_bp_stype(state_file: str, stale_rows: list):
 
-    with open(file, 'a') as f:
+    with open(state_file, 'a') as f:
         f.write('batchstart\n')
         for stale_row in stale_rows:
             # print('wrote#'+str(stale_row[0]))
             f.write('cancel#'+str(stale_row[0]) + '\n')
 
 
-def process_fetchmany(file: str, size: int = 100):
+def process_fetchmany(state_file: str, size: int = 100):
     try:
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
@@ -177,7 +175,7 @@ def process_fetchmany(file: str, size: int = 100):
         cursor.execute("SELECT * FROM usersubs")
         while True:
             rows = cursor.fetchmany(size)
-            stale_bp_stype(file, rows)
+            stale_bp_stype(state_file, rows)
             if not rows:
                 break
     except Error as e:
@@ -185,6 +183,23 @@ def process_fetchmany(file: str, size: int = 100):
     finally:
         cursor.close()
         conn.close()
+
+
+def run_batchprocessor_old(stale_file: str) -> bool:
+    # result = subprocess.run(["pwd"], stderr=subprocess.PIPE, text=True)
+    # result = subprocess.run(["ls", "-l", "../resources/"], stderr=subprocess.PIPE, text=True)
+    # result = subprocess.run(["cat", "../resources/stale_clean_sh.sh"], stderr=subprocess.PIPE, text=True)
+    # result = subprocess.run(["cat", "stale_file"], stderr=subprocess.PIPE, text=True)
+    # result = subprocess.run(["/usr/bin/bash", "../resources/stale_cleaner_sh.sh", stale_file], stderr=subprocess.PIPE, text=True)
+    # return result.stderr
+    exit_code = subprocess.call("/home/madhu/PycharmProjects/pythonProject2/resources/stale_clean_sh.sh")
+    print(exit_code)
+
+
+def run_batchprocessor(stale_file: str):
+    print('stale_file = ', stale_file)
+    exit_code = subprocess.check_call("../resources/stale_clean_sh.sh %s" % stale_file, shell=True)
+    print(exit_code)
 
 
 if __name__ == '__main__':
@@ -199,5 +214,7 @@ if __name__ == '__main__':
     #     print('inrow')
     #     stale_bp_stype(row, file)
     # stale_bp_stype(rows, file)
-    stale_bp_print(file)
+    # stale_bp_print(file)
+    print('Begin stale process... file = ', file)
+    run_batchprocessor(file)
 
