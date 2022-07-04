@@ -6,7 +6,7 @@ mydb = mysql.connector.connect(
   user="root",
   password=""
 )
-
+ 
 print(mydb)
 #
 # CREATE TABLE test.usersubs (
