@@ -158,7 +158,7 @@ def stale_bp_print(state_file: str):
         print(f.read())
 
 
-def stale_bp_stype(state_file: str, stale_rows: list):
+def create_batchprocessor_inputfile(state_file: str, stale_rows: list):
 
     with open(state_file, 'a') as f:
         f.write('batchstart\n')
@@ -167,7 +167,7 @@ def stale_bp_stype(state_file: str, stale_rows: list):
             f.write('cancel#'+str(stale_row[0]) + '\n')
 
 
-def process_fetchmany(state_file: str, size: int = 100):
+def prepare_batchprocessor(state_file: str, size: int = 100):
     try:
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
@@ -175,7 +175,7 @@ def process_fetchmany(state_file: str, size: int = 100):
         cursor.execute("SELECT * FROM usersubs")
         while True:
             rows = cursor.fetchmany(size)
-            stale_bp_stype(state_file, rows)
+            create_batchprocessor_inputfile(state_file, rows)
             if not rows:
                 break
     except Error as e:
@@ -190,7 +190,8 @@ def run_batchprocessor_old(stale_file: str) -> bool:
     # result = subprocess.run(["ls", "-l", "../resources/"], stderr=subprocess.PIPE, text=True)
     # result = subprocess.run(["cat", "../resources/stale_clean_sh.sh"], stderr=subprocess.PIPE, text=True)
     # result = subprocess.run(["cat", "stale_file"], stderr=subprocess.PIPE, text=True)
-    # result = subprocess.run(["/usr/bin/bash", "../resources/stale_cleaner_sh.sh", stale_file], stderr=subprocess.PIPE, text=True)
+    # result = subprocess.run(["/usr/bin/bash", "../resources/stale_cleaner_sh.sh", stale_file],
+    #                                                                       stderr=subprocess.PIPE, text=True)
     # return result.stderr
     exit_code = subprocess.call("/home/madhu/PycharmProjects/pythonProject2/resources/stale_clean_sh.sh")
     print(exit_code)
@@ -204,7 +205,6 @@ def run_batchprocessor(stale_file: str):
 
 if __name__ == '__main__':
     file = "stale_bpinput" + datetime.today().isoformat()
-    process_fetchmany(file, 3)
     # query_with_fetchall()
     # query_with_fetchone()
     # query_with_fetchmany(2)
@@ -215,6 +215,7 @@ if __name__ == '__main__':
     #     stale_bp_stype(row, file)
     # stale_bp_stype(rows, file)
     # stale_bp_print(file)
-    print('Begin stale process... file = ', file)
+    # print('Begin stale process... file = ', file)
+    prepare_batchprocessor(file, 3)
     run_batchprocessor(file)
 
