@@ -39,6 +39,7 @@ def download_file(bucket, file_name, p_temp_location):
 
 
 def print_file(file_name):
+    # print('print_file file_name: ', file_name)
     with open(file_name) as f:
         for line in f:
             print(line)
@@ -47,8 +48,10 @@ def print_file(file_name):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print('hello1')
-    temp_location = os.getenv('TEMP')
+    # temp_location = os.getenv('HOME')
     file_to_download = 'downloadtest.txt'
+    temp_location = 'C:\\Users\\madhu\\Temp\\'
+    print('temp_location: ', temp_location)
     # upload_file('umadhu1608test', '../uploadtest.txt', object_name=None)
     download_file('umadhu1608test', file_to_download, temp_location)
-    print_file(temp_location+file_to_download)
+    # print_file(temp_location+file_to_download)

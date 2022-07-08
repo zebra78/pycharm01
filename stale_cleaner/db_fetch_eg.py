@@ -1,3 +1,5 @@
+import os
+
 from mysql.connector import MySQLConnection, Error
 from configparser import ConfigParser
 from datetime import datetime
@@ -51,6 +53,7 @@ def connect():
 
 def query_with_fetchall():
     conn = ""
+    cursor = ""
     try:
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
@@ -66,11 +69,16 @@ def query_with_fetchall():
         print(e)
 
     finally:
-        cursor.close()
-        conn.close()
+        try:
+            cursor.close()
+            conn.close()
+        except UnboundLocalError:
+            print('Warn: Something not good happenned ..')
 
 
 def query_with_fetchone():
+    conn = ""
+    cursor = ""
     try:
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
@@ -87,8 +95,11 @@ def query_with_fetchone():
         print(e)
 
     finally:
-        cursor.close()
-        conn.close()
+        try:
+            cursor.close()
+            conn.close()
+        except UnboundLocalError:
+            print('Warn: Something not good happenned ..')
 
 
 def iter_row(cursor, size):
@@ -101,6 +112,8 @@ def iter_row(cursor, size):
 
 
 def query_with_fetchmany(size: int = 1):
+    conn = ""
+    cursor = ""
     try:
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
@@ -116,8 +129,11 @@ def query_with_fetchmany(size: int = 1):
         print(e)
 
     finally:
-        cursor.close()
-        conn.close()
+        try:
+            cursor.close()
+            conn.close()
+        except UnboundLocalError:
+            print('Warn: Something not good happenned ..')
 
 
 def stale_fetchmany(cursor, size) -> list:
@@ -126,6 +142,8 @@ def stale_fetchmany(cursor, size) -> list:
 
 
 def stale_fetchall() -> list:
+    conn = ""
+    cursor = ""
     try:
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
@@ -135,8 +153,11 @@ def stale_fetchall() -> list:
     except Error as e:
         print(e)
     finally:
-        cursor.close()
-        conn.close()
+        try:
+            cursor.close()
+            conn.close()
+        except UnboundLocalError:
+            print('Warn: Something not good happenned ..')
 
 
 def stale_bp_stype_old(stale_rows: list):
@@ -149,7 +170,7 @@ def stale_bp_stype_old(stale_rows: list):
 def stale_bp_stype_old2(stale_row: tuple, state_file: str):
     with open(state_file, 'w') as f:
         # print('wrote#'+str(stale_row[0]))
-        f.write('cancel#'+str(stale_row[0]))
+        f.write('cancel#' + str(stale_row[0]))
 
 
 def stale_bp_print(state_file: str):
@@ -158,34 +179,39 @@ def stale_bp_print(state_file: str):
         print(f.read())
 
 
-def create_batchprocessor_inputfile(state_file: str, stale_rows: list):
-
-    with open(state_file, 'a') as f:
-        f.write('batchstart\n')
+def create_batchprocessor_inputfile(state_file: str, stale_rows: list, read_mode: str = 'w'):
+    with open(state_file, read_mode) as f:
         for stale_row in stale_rows:
             # print('wrote#'+str(stale_row[0]))
-            f.write('cancel#'+str(stale_row[0]) + '\n')
+            f.write('cancel#' + str(stale_row[0]) + '\n')
 
 
 def prepare_batchprocessor(state_file: str, size: int = 100):
+    conn = ""
+    cursor = ""
     try:
         dbconfig = read_db_config()
         conn = MySQLConnection(**dbconfig)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM usersubs")
+        read_mode = 'w'
         while True:
             rows = cursor.fetchmany(size)
-            create_batchprocessor_inputfile(state_file, rows)
+            create_batchprocessor_inputfile(state_file, rows, read_mode)
+            read_mode = 'a'
             if not rows:
                 break
     except Error as e:
         print(e)
     finally:
-        cursor.close()
-        conn.close()
+        try:
+            cursor.close()
+            conn.close()
+        except UnboundLocalError:
+            print('Warn: Something not good happenned ..')
 
 
-def run_batchprocessor_old(stale_file: str) -> bool:
+def run_batchprocessor_old(stale_file: str) -> int:
     # result = subprocess.run(["pwd"], stderr=subprocess.PIPE, text=True)
     # result = subprocess.run(["ls", "-l", "../resources/"], stderr=subprocess.PIPE, text=True)
     # result = subprocess.run(["cat", "../resources/stale_clean_sh.sh"], stderr=subprocess.PIPE, text=True)
@@ -194,17 +220,24 @@ def run_batchprocessor_old(stale_file: str) -> bool:
     #                                                                       stderr=subprocess.PIPE, text=True)
     # return result.stderr
     exit_code = subprocess.call("/home/madhu/PycharmProjects/pythonProject2/resources/stale_clean_sh.sh")
-    print(exit_code)
+    print(exit_code, stale_file)
+    return exit_code
+
+
+def run_batchprocessor_os_system(stale_file: str):
+    # exit_code = subprocess.check_call("../resources/stale_clean_sh.sh %s" % stale_file, shell=True)
+    print(stale_file)
+    os.system("/home/madhu/process.sh stale_bpinput")
 
 
 def run_batchprocessor(stale_file: str):
-    print('stale_file = ', stale_file)
-    exit_code = subprocess.check_call("../resources/stale_clean_sh.sh %s" % stale_file, shell=True)
+    exit_code = subprocess.check_call("/home/madhu/process.sh %s" % stale_file, shell=True)
     print(exit_code)
 
 
 if __name__ == '__main__':
     file = "stale_bpinput" + datetime.today().isoformat()
+    # file = "stale_bpinput"
     # query_with_fetchall()
     # query_with_fetchone()
     # query_with_fetchmany(2)
@@ -217,5 +250,7 @@ if __name__ == '__main__':
     # stale_bp_print(file)
     # print('Begin stale process... file = ', file)
     prepare_batchprocessor(file, 3)
+    print('bef print ...')
+    stale_bp_print(file)
+    print('bef bp ...')
     run_batchprocessor(file)
-
