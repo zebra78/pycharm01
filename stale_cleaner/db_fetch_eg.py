@@ -1,3 +1,5 @@
+import os
+
 from mysql.connector import MySQLConnection, Error
 from configparser import ConfigParser
 from datetime import datetime
@@ -158,10 +160,8 @@ def stale_bp_print(state_file: str):
         print(f.read())
 
 
-def create_batchprocessor_inputfile(state_file: str, stale_rows: list):
-
-    with open(state_file, 'a') as f:
-        f.write('batchstart\n')
+def create_batchprocessor_inputfile(state_file: str, stale_rows: list, read_mode: str = 'w'):
+    with open(state_file, read_mode) as f:
         for stale_row in stale_rows:
             # print('wrote#'+str(stale_row[0]))
             f.write('cancel#'+str(stale_row[0]) + '\n')
@@ -173,9 +173,11 @@ def prepare_batchprocessor(state_file: str, size: int = 100):
         conn = MySQLConnection(**dbconfig)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM usersubs")
+        read_mode = 'w'
         while True:
             rows = cursor.fetchmany(size)
-            create_batchprocessor_inputfile(state_file, rows)
+            create_batchprocessor_inputfile(state_file, rows, read_mode)
+            read_mode = 'a'
             if not rows:
                 break
     except Error as e:
@@ -197,14 +199,20 @@ def run_batchprocessor_old(stale_file: str) -> bool:
     print(exit_code)
 
 
+def run_batchprocessor_os_system(stale_file: str):
+    # exit_code = subprocess.check_call("../resources/stale_clean_sh.sh %s" % stale_file, shell=True)
+    # print(exit_code)
+    os.system("/home/madhu/process.sh stale_bpinput" )
+
+
 def run_batchprocessor(stale_file: str):
-    print('stale_file = ', stale_file)
-    exit_code = subprocess.check_call("../resources/stale_clean_sh.sh %s" % stale_file, shell=True)
+    exit_code = subprocess.check_call("/home/madhu/process.sh %s" % stale_file, shell=True)
     print(exit_code)
 
 
 if __name__ == '__main__':
     file = "stale_bpinput" + datetime.today().isoformat()
+    # file = "stale_bpinput"
     # query_with_fetchall()
     # query_with_fetchone()
     # query_with_fetchmany(2)
@@ -217,5 +225,8 @@ if __name__ == '__main__':
     # stale_bp_print(file)
     # print('Begin stale process... file = ', file)
     prepare_batchprocessor(file, 3)
+    print('bef print ...')
+    stale_bp_print(file)
+    print('bef bp ...')
     run_batchprocessor(file)
 
