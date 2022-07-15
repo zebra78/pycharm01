@@ -230,6 +230,12 @@ def run_batchprocessor_os_system(stale_file: str):
     os.system("/home/madhu/process.sh stale_bpinput")
 
 
+def run_batchprocessor_os_system(stale_file: str):
+    # exit_code = subprocess.check_call("../resources/stale_clean_sh.sh %s" % stale_file, shell=True)
+    # print(exit_code)
+    os.system("/home/madhu/process.sh stale_bpinput" )
+
+
 def run_batchprocessor(stale_file: str):
     exit_code = subprocess.check_call("/home/madhu/process.sh %s" % stale_file, shell=True)
     print(exit_code)
