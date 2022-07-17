@@ -6,7 +6,7 @@ def first_word(text: str) -> str:
     returns the first word in a given text.
     """
     try:
-        return text[0:text.index(" ")]
+        return text[0:text.index(" ")] 
     except ValueError:
         return text[0:len(text)]
 
